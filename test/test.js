@@ -452,5 +452,58 @@ t.test('turbo-json-parse', t => {
     t.end()
   })
 
+  t.test('multi key/value string,number,null', t => {
+    const parser = tjp({
+      type: 'object',
+      properties: {
+        key1: { type: ['string', 'number', 'null'] },
+        key2: { type: ['null', 'string', 'number'] }
+      }
+    }, { prettyPrinted: true })
+    t.deepEqual(parser(JSON.stringify({
+      key1: null,
+      key2: 3
+    }, null, 2)), {
+      key1: null,
+      key2: 3
+    })
+    t.end()
+  })
+
+  t.test('multi array with nested multi', t => {
+    const parser = tjp({
+      type: 'object',
+      properties: {
+        key1: {
+          type: 'array',
+          items: {
+            type: [
+              'number',
+              { type: 'array', items: { type: [ 'string', 'number' ] } }
+            ]
+          }
+        }
+      }
+    }, { prettyPrinted: true })
+    t.deepEqual(parser(JSON.stringify({
+      key1: [
+        [1, 2, 3, 'a', 'b', 'c'],
+        1,
+        2,
+        3,
+        ['test']
+      ]
+    }, null, 2)), {
+      key1: [
+        [1, 2, 3, 'a', 'b', 'c'],
+        1,
+        2,
+        3,
+        ['test']
+      ]
+    })
+    t.end()
+  })
+
   t.end()
 })
